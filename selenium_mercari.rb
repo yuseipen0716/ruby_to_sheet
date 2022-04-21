@@ -19,5 +19,14 @@ driver.manage.timeouts.page_load = @wait_time
 cur_url = driver.current_url
 puts cur_url
 
+driver.navigate.refresh
+# あとでclickしたい部分(要素)を取得する
+shadow_host = driver.find_element(:xpath, "//*[@id='item-grid']/ul/li[1]/a/mer-item-thumbnail")
+shadow_root = shadow_host.shadow_root
+item_link = shadow_root.find_element(:css, '.item-name')
+# item-nameのinnnerTextは今後使用するので変数に格納しておく
+item_name = item_link.text
+puts item_name
+
 # driverをとじる
 driver.quit
