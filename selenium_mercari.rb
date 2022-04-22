@@ -19,14 +19,18 @@ driver.manage.timeouts.page_load = @wait_time
 cur_url = driver.current_url
 puts cur_url
 
+# ポップアップ等が先に出ていると正しく要素を取得できない可能性があるため、ここでサイトを更新
 driver.navigate.refresh
-# あとでclickしたい部分(要素)を取得する
+
+# 欲しい情報がshadow_rootに格納されていたのでshadow_rootの中身を読み込めるよう以下のようにステップを踏んで情報を取得
 shadow_host = driver.find_element(:xpath, "//*[@id='item-grid']/ul/li[1]/a/mer-item-thumbnail")
 shadow_root = shadow_host.shadow_root
 item_link = shadow_root.find_element(:css, '.item-name')
-# item-nameのinnnerTextは今後使用するので変数に格納しておく
+# item-nameのinnnerTextは今後使用するので変数に格納しておく(一応これ商品名です。)
 item_name = item_link.text
 puts item_name
+
+# 次はリンクをclickして、current_urlを拾ってきて値段等の情報をみにいく
 
 # driverをとじる
 driver.quit
