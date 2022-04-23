@@ -15,10 +15,6 @@ driver.get('https://jp.mercari.com/search?keyword=CPU')
 # ちゃんと開けているか確認するためpage_loadのwaitを入れる
 driver.manage.timeouts.page_load = @wait_time
 
-# current_pageのURLを取得し、出力
-cur_url = driver.current_url
-puts cur_url
-
 # ポップアップ等が先に出ていると正しく要素を取得できない可能性があるため、ここでサイトを更新
 driver.navigate.refresh
 
@@ -30,7 +26,44 @@ item_link = shadow_root.find_element(:css, '.item-name')
 item_name = item_link.text
 puts item_name
 
-# 次はリンクをclickして、current_urlを拾ってきて値段等の情報をみにいく
+# 商品詳細ページへジャンプ
+item_link.click
+
+# ページ読み込みを待つ
+page_title = "#{item_name} - メルカリ"
+wait.until {driver.title == page_title}
+
+# current_pageのURLを取得し、出力
+cur_url = driver.current_url
+puts cur_url
+
+begin
+  # 値段を取得
+  shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[1]/section[1]/div/mer-price")
+  shadow_root = shadow_host.shadow_root
+  price = shadow_root.find_element(:css, '.number').text
+rescue Selenium::WebDriver::Error::NoSuchElementError
+  p 'no such element error!!'
+  return
+end
+
+puts price
+
+begin
+  # 概要欄を取得していく
+  shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[2]/mer-show-more")
+  shadow_root = shadow_host.shadow_root
+  # 「もっとみる」ボタンがあれば展開して概要欄を取得
+  if more_btn = shadow_root.find_element(:css, '.show-more-button')
+    more_btn.click
+    # 「もっとみる」ボタンがないなら、そのまま概要欄を取得
+  end
+  content = shadow_root.find_element(:css, '.content').text
+rescue Selenium::WebDriver::Error::NoSuchElementError
+  p 'no such element error!!'
+  return
+end
+puts content
 
 # driverをとじる
 driver.quit
