@@ -24,12 +24,19 @@ driver.manage.timeouts.page_load = @wait_time
 driver.navigate.refresh
 
 # 欲しい情報がshadow_rootに格納されていたのでshadow_rootの中身を読み込めるよう以下のようにステップを踏んで情報を取得
-shadow_host = driver.find_element(:xpath, "//*[@id='item-grid']/ul/li[1]/a/mer-item-thumbnail")
-shadow_root = shadow_host.shadow_root
-item_link = shadow_root.find_element(:css, '.item-name')
-# item-nameのinnnerTextは今後使用するので変数に格納しておく(一応これ商品名です。)
+begin
+  # 値段を取得
+  shadow_host = driver.find_element(:xpath, "//*[@id='item-grid']/ul/li[1]/a/mer-item-thumbnail")
+  shadow_root = shadow_host.shadow_root
+  item_link = shadow_root.find_element(:css, '.item-name')
+rescue Selenium::WebDriver::Error::NoSuchElementError
+  p 'no such element error!!'
+  return
+end
+# item-name(商品名)を取得
 item_name = item_link.text
 puts item_name
+
 # 商品詳細ページへジャンプ
 item_link.click
 
@@ -37,9 +44,9 @@ item_link.click
 page_title = "#{item_name} - メルカリ"
 wait.until {driver.title == page_title}
 
-# current_pageのURLを取得し、出力
-cur_url = driver.current_url
-puts cur_url
+# 商品のURLを取得し、出力
+item_url = driver.current_url
+puts item_url
 
 begin
   # 値段を取得
