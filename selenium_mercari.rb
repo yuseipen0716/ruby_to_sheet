@@ -5,12 +5,17 @@ require 'selenium-webdriver'
 
 # Seleniumの初期化
 driver = Selenium::WebDriver.for :chrome
+# windowを最大化(windowの初期サイズだと押せないボタンがあるため)
+driver.manage.window.maximize
 # driverがきちんと起動したか、暗黙的な待機を入れる
 driver.manage.timeouts.implicit_wait = @timeout
 wait = Selenium::WebDriver::Wait.new(timeout: @wait_time)
 
-# メルカリを開く
-driver.get('https://jp.mercari.com/search?keyword=CPU')
+# ここを任意の検索ワードに指定する
+search_word = 'CPU'
+
+# メルカリ(検索結果)を開く
+driver.get("https://jp.mercari.com/search?keyword=#{search_word}")
 
 # ちゃんと開けているか確認するためpage_loadのwaitを入れる
 driver.manage.timeouts.page_load = @wait_time
@@ -25,7 +30,6 @@ item_link = shadow_root.find_element(:css, '.item-name')
 # item-nameのinnnerTextは今後使用するので変数に格納しておく(一応これ商品名です。)
 item_name = item_link.text
 puts item_name
-
 # 商品詳細ページへジャンプ
 item_link.click
 
@@ -53,17 +57,19 @@ begin
   # 概要欄を取得していく
   shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[2]/mer-show-more")
   shadow_root = shadow_host.shadow_root
-  # 「もっとみる」ボタンがあれば展開して概要欄を取得
-  if more_btn = shadow_root.find_element(:css, '.show-more-button')
-    more_btn.click
-    # 「もっとみる」ボタンがないなら、そのまま概要欄を取得
-  end
+  # 概要欄を取得
   content = shadow_root.find_element(:css, '.content').text
 rescue Selenium::WebDriver::Error::NoSuchElementError
   p 'no such element error!!'
   return
 end
 puts content
+
+driver.navigate.back
+# current_pageのURLを取得し、出力
+cur_url = driver.current_url
+puts cur_url
+
 
 # driverをとじる
 driver.quit
