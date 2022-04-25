@@ -65,6 +65,25 @@ rescue Selenium::WebDriver::Error::NoSuchElementError
 end
 puts content
 
+# 売り切れかどうか判断する処理
+begin
+  # 売り切れステッカーを取得
+  shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[1]/div[2]/mer-button")
+  shadow_root = shadow_host.shadow_root
+  status_text = shadow_root.find_element(:css, '.button').text
+  if status_text == "売り切れました"
+    status = '売り切れ'
+  else
+    status = '販売中'
+  end
+rescue Selenium::WebDriver::Error::NoSuchElementError
+  p 'no such element error!!'
+  return
+end
+
+puts status
+
+
 driver.navigate.back
 # current_pageのURLを取得し、出力
 cur_url = driver.current_url
