@@ -1,4 +1,5 @@
 require 'selenium-webdriver'
+require 'csv'
 
 @wait_time = 10
 @timeout = 4
@@ -39,7 +40,6 @@ rescue Selenium::WebDriver::Error::NoSuchElementError
 end
 # item-name(商品名)を取得
 item_name = item_link.text
-puts item_name
 
 # 商品詳細ページへジャンプ
 item_link.click
@@ -48,33 +48,20 @@ item_link.click
 page_title = "#{item_name} - メルカリ"
 wait.until {driver.title == page_title}
 
-# 商品のURLを取得し、出力
+# 商品のURLを取得
 item_url = driver.current_url
-puts item_url
 
 begin
-  # 値段を取得
+  # 値段を取得するための処理
   shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[1]/section[1]/div/mer-price")
   shadow_root = shadow_host.shadow_root
-  price = shadow_root.find_element(:css, '.number').text
+  price_element = shadow_root.find_element(:css, '.number')
 rescue Selenium::WebDriver::Error::NoSuchElementError
   p 'no such element error!!'
   return
 end
-
-puts price
-
-begin
-  # 概要欄を取得していく
-  shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[2]/mer-show-more")
-  shadow_root = shadow_host.shadow_root
-  # 概要欄を取得
-  content = shadow_root.find_element(:css, '.content').text
-rescue Selenium::WebDriver::Error::NoSuchElementError
-  p 'no such element error!!'
-  return
-end
-puts content
+# 値段を取得
+price = price_element.text
 
 # 売り切れかどうか判断する処理
 begin
@@ -92,8 +79,32 @@ rescue Selenium::WebDriver::Error::NoSuchElementError
   return
 end
 
-puts status
+begin
+  # 概要欄を取得していく
+  shadow_host = driver.find_element(:xpath, "//*[@id='item-info']/section[2]/mer-show-more")
+  shadow_root = shadow_host.shadow_root
+  content_area = shadow_root.find_element(:css, '.content')
+rescue Selenium::WebDriver::Error::NoSuchElementError
+  p 'no such element error!!'
+  return
+end
+# 概要欄を取得
+content = content_area.text
 
+items = Array.new
+item_data = { item_name: item_name, item_url: item_url, price: price, status: status, content: content }
+items << item_data
+CSV.open('sample1.csv', 'w') do |csv|
+  csv << ["商品名", "商品URL", "価格", "販売状況", "概要欄"]
+  items.each do |item|
+    item_name = item[:item_name]
+    item_url = item[:item_url]
+    price = item[:price]
+    status = item[:status]
+    content = item[:content]
+    csv << [item_name, item_url, price, status, content]
+  end
+end
 #検索結果一覧へ戻る
 driver.navigate.back
 
