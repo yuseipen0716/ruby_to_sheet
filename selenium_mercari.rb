@@ -1,5 +1,20 @@
 require 'selenium-webdriver'
 
+# GoogleDriveAPI使用のための準備
+require 'google_drive'
+session = GoogleDrive::Session.from_config("config.json")
+
+# spreadsheetの読み込み
+sheets = session.spreadsheet_by_key("1GiHF8FD1LIC-RVVwQ2cGlRni0wQ9qFAmk9UZ9NqaKWk").worksheets[0]
+
+# sheetへの書き込み
+sheets[1,1] = "hello world!"
+
+# sheetの保存
+sheets.save
+
+
+
 @wait_time = 10
 @timeout = 4
 
