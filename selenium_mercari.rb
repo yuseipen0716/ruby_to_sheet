@@ -20,6 +20,10 @@ driver.get("https://jp.mercari.com/search?keyword=#{search_word}")
 # ちゃんと開けているか確認するためpage_loadのwaitを入れる
 driver.manage.timeouts.page_load = @wait_time
 
+
+
+# ========================== ここから商品情報取得のための処理セット ======================================
+
 # ポップアップ等が先に出ていると正しく要素を取得できない可能性があるため、ここでサイトを更新
 driver.navigate.refresh
 
@@ -92,6 +96,8 @@ puts status
 
 #検索結果一覧へ戻る
 driver.navigate.back
+
+# ========================== ここまでが1つの処理のセット ======================================
 
 # driverをとじる
 driver.quit
