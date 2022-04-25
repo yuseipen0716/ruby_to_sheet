@@ -90,12 +90,8 @@ end
 
 puts status
 
-
+#検索結果一覧へ戻る
 driver.navigate.back
-# current_pageのURLを取得し、出力
-cur_url = driver.current_url
-puts cur_url
-
 
 # driverをとじる
 driver.quit
