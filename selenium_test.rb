@@ -46,5 +46,6 @@ driver.navigate.back
 cur_url = driver.current_url
 puts cur_url
 
+
 # 忘れず、driverを閉じること!
 driver.quit
