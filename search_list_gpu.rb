@@ -144,4 +144,4 @@ GPU_LIST = [
   "Radeon HD 5450",
   "Intel HD Graphics 3000",
   "Intel HD Graphics 2500",
-}
+]

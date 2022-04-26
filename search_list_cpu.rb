@@ -84,4 +84,4 @@ CPU_LIST = [
   "Pentium G6605",
   "Pentium G6400",
   "Celeron G6900",
-}
+]
