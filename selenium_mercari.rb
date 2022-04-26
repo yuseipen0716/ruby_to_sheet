@@ -5,7 +5,7 @@ require 'google_drive'
 session = GoogleDrive::Session.from_config("config.json")
 
 # spreadsheetの読み込み
-sheets = session.spreadsheet_by_key("1GiHF8FD1LIC-RVVwQ2cGlRni0wQ9qFAmk9UZ9NqaKWk").worksheets[0]
+sheets = session.spreadsheet_by_key("1GrmhrRlff47aUSmYbpIYZw_LBvGEnLCDsqzpa7jHw28").worksheet_by_title("シート1")
 
 # sheetへの書き込み
 sheets[1,1] = "hello world!"
