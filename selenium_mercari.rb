@@ -12,10 +12,10 @@ driver.manage.timeouts.implicit_wait = @timeout
 wait = Selenium::WebDriver::Wait.new(timeout: @wait_time)
 
 # ここを任意の検索ワードに指定する
-search_word = 'CPU'
+search_word = 'GeForce%20RTX'
 
 # メルカリ(検索結果)を開く
-driver.get("https://jp.mercari.com/search?keyword=#{search_word}")
+driver.get("https://jp.mercari.com/search?keyword=#{search_word}&status=on_sale")
 
 # ちゃんと開けているか確認するためpage_loadのwaitを入れる
 driver.manage.timeouts.page_load = @wait_time
@@ -29,7 +29,7 @@ driver.navigate.refresh
 
 # 欲しい情報がshadow_rootに格納されていたのでshadow_rootの中身を読み込めるよう以下のようにステップを踏んで情報を取得
 begin
-  # 値段を取得
+  # 商品名を取得
   shadow_host = driver.find_element(:xpath, "//*[@id='item-grid']/ul/li[1]/a/mer-item-thumbnail")
   shadow_root = shadow_host.shadow_root
   item_link = shadow_root.find_element(:css, '.item-name')
@@ -97,7 +97,62 @@ puts status
 #検索結果一覧へ戻る
 driver.navigate.back
 
-# ========================== ここまでが1つの処理のセット ======================================
+sleep 1
 
+# ========= ページ遷移のための処理 ==========
+# 次へ、のリンクしかない(初めのページ)はほかのページとxpathが違うので、下記の通り、2パターンのxpathを
+# 拾えるようにする。no such elementsで例外が出ないように、rescueでnilにしてあげる。
+begin
+  button_single = driver.find_element(:xpath, "//*[@id='search-result']/div/div/div/div[1]/mer-button/button")
+rescue
+  nil
+end
+
+begin
+  button_double = driver.find_element(:xpath, "//*[@id='search-result']/div/div/div/div[1]/mer-button[2]/button")
+rescue
+  nil
+end
+
+# 取得できたボタンのうち、どちらかが「次へ」ボタンであればroop
+while true
+  # button_singleをifの条件に書くと少し厄介なことになるので、doubleのほうでひっかける。
+  # (2ページ目以降、つまり前へ、次へどちらのボタンもあるページではbutton_singleのxpathが
+  # 前へ、次へのbuttonタグを内包する配列のxpathとなっているため、button_singleはnilにならず、前へボタンを取得してしまい、
+  # ページが進まなくなる)
+  if button_double
+    button_double.click
+  else
+    button_single.click
+  end
+  sleep 1
+
+  # デバッグ用にURLを吐き出すようにしてある。実際に運用する際は消すこと。
+  puts driver.current_url
+
+  # 最終ページ(前へボタンしかない状態)でもbutton_doubleの変数の値が残ってしまい、roopから抜けないので、ここでreset
+  button_single = nil
+  button_double = nil
+  begin
+    button_single = driver.find_element(:xpath, "//*[@id='search-result']/div/div/div/div[1]/mer-button/button")
+  rescue
+    nil
+  end
+  
+  # デバッグ用にボタンテキストを吐き出すようにしてある。実際に運用する際は消すこと。
+  puts button_single.text
+
+  begin
+    button_double = driver.find_element(:xpath, "//*[@id='search-result']/div/div/div/div[1]/mer-button[2]/button")
+  rescue
+    nil
+  end
+
+  break if button_double == nil
+
+  # デバッグ用にボタンテキストを吐き出すようにしてある。実際に運用する際は消すこと。
+  puts button_double.text
+end
+# ========================== ここまでが1つの処理のセット ======================================
 # driverをとじる
 driver.quit
